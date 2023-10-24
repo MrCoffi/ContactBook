@@ -25,7 +25,7 @@ public class ContactWorkerInit extends AbstractContactService {
     public void getAllContact() {
         myContacts.addAll(super.getPerson());
         for (String line : myContacts) {
-            System.out.println(replaceForInfo(line).replaceAll(",", "|"));
+            System.out.println(replaceForInfo(line).replaceAll(";", "|"));
         }
     }
 
