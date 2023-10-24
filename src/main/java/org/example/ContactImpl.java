@@ -6,6 +6,4 @@ public interface ContactImpl {
     void getAllContact();
     void addPersonToList(String input);
     void saveContactsToFile();
-    String replaceForInfo(String p);
-    String replaceForSave(String text);
 }

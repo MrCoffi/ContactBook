@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.Entity.Person;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.BufferedWriter;
@@ -10,7 +11,7 @@ import java.util.*;
 public abstract class AbstractContactService implements ContactImpl {
     @Value("${contact.path}")
     private String filePath;
-    private Set<String> person = new HashSet<>();
+    private Set<Person> person = new HashSet<>();
     Scanner s = new Scanner(System.in);
 
     @Override
@@ -41,7 +42,7 @@ public abstract class AbstractContactService implements ContactImpl {
 
     @Override
     public void removeContact(String input) {
-        person.removeIf(p -> p.contains(input));
+        person.removeIf(person -> person.getEmail().equals(input));
     }
 
     @Override
@@ -49,8 +50,8 @@ public abstract class AbstractContactService implements ContactImpl {
         if (person.isEmpty()) {
             System.out.println("person's empty");
         } else {
-            for (String p : person) {
-                System.out.println(replaceForInfo(p));
+            for (Person one : person) {
+                System.out.println(one.toString());
             }
         }
     }
@@ -58,16 +59,32 @@ public abstract class AbstractContactService implements ContactImpl {
     @Override
     public void addPersonToList(String input) {
         String[] st = input.split(";");
-        person.add(Arrays.toString(st));
+        Person person1 = new Person(st[0], st[1], st[2]);
+
+        if (!isDuplicateEmail(person1.getEmail())) {
+            person.add(person1);
+            System.out.println("Person added successfully.");
+        } else {
+            System.out.println("Person with the same e-mail already exists.");
+        }
+    }
+
+    public boolean isDuplicateEmail(String eMail) {
+        for (Person p : person) {
+            if (p.getEmail().equals(eMail)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public void saveContactsToFile() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(getFilePath(),true))) {
             if (!person.isEmpty()) {
-                for (String p : person) {
-                    if (!p.isEmpty()) {
-                        writer.write(replaceForSave(p));
+                for (Person one : person) {
+                    if (one != null) {
+                        writer.write(one.getName() + ";" + one.getPhone() + ";" + one.getEmail());
                         writer.newLine();
                     }
                 }
@@ -79,30 +96,11 @@ public abstract class AbstractContactService implements ContactImpl {
         }
     }
 
-    @Override
-    public String replaceForSave(String text) {
-        return text
-                .replace("[", "")
-                .replace("]", "")
-                .replaceAll(",|//s", ";")
-                .replaceAll(" ", "");
-    }
-
-    @Override
-    public String replaceForInfo(String p) {
-        return p
-                .replace("[", "")
-                .replace("]", "")
-                .replaceAll(",", "|")
-                .replaceAll(" ", "");
-    }
-
     public String getFilePath() {
         return filePath;
     }
 
-    public Set<String> getPerson() {
+    public Set<Person> getPerson() {
         return person;
     }
-
 }
